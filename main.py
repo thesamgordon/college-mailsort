@@ -12,28 +12,26 @@ def main():
     router = Router(imap_client)
     
     print(f"Email service started. Checking for new emails every {TIMEOUT} seconds.")
-    
-    while True:
-        try:
-            print("Checking for new unseen emails...")
-            messages = imap_client.fetch_unseen()
-            if not messages:
-                print("No new unseen emails found.")
-            for uid, subject, sender, body in messages:
-                label = classifier.classify(subject, body, sender)
-                
-                if label is None:
-                    print(f"Classification failed for email UID: {uid}. Skipping.")
-                    continue
-                
-                if label not in config.FOLDERS:
-                    continue
-                
-                router.route(uid, label)
-        except Exception as e:
-            print(f"An error occurred: {e}")
+
+    try:
+        print("Checking for new unseen emails...")
+        messages = imap_client.fetch_unseen()
+        if not messages:
+            print("No new unseen emails found.")
+        for uid, subject, sender, body in messages:
+            label = classifier.classify(subject, body, sender)
+            
+            if label is None:
+                print(f"Classification failed for email UID: {uid}. Skipping.")
+                continue
+            
+            if label not in config.FOLDERS:
+                continue
+            
+            router.route(uid, label)
+    except Exception as e:
+        print(f"An error occurred: {e}")
         
-        time.sleep(TIMEOUT)
 
 if __name__ == "__main__":
     main()
